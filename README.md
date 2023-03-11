@@ -4,9 +4,9 @@
 
 该应用实现对交付工程师在交付交付中无相应网管设备，或者中小型网络运维无网管设备，需要对交换机设备做批量的信息收集而开发的一个可扩展性的网络设备信息收集工具。
 
-![](.\static\image\image-20230311173710167.png)
+![](https://github.com/liuyuanchengweb/simple_network_inspection_tool/blob/main/static/image/image-20230311173710167.png)
 
-![image-20230311182347849](.\static\image\image-20230311182347849.png)
+![image-20230311182347849](https://github.com/liuyuanchengweb/simple_network_inspection_tool/blob/main/static/image/image-20230311182347849.png)
 
 ## 功能
 
@@ -26,19 +26,19 @@
 
 主要用于测试设备的端口是否连通正常
 
-![image-20230311182225788](.\static\image\image-20230311182225788.png)
+![image-20230311182225788](https://github.com/liuyuanchengweb/simple_network_inspection_tool/blob/main/static/image/image-20230311182225788.png)
 
 ### 启动巡检
 
 主要用于启动设备连接，执行插件模板中的函数，执行完成根据插件模板中的函数返回的内容形成excel文档.
 
-![image-20230311182505326](.\static\image\image-20230311182505326.png)
+![image-20230311182505326](https://github.com/liuyuanchengweb/simple_network_inspection_tool/blob/main/static/image/image-20230311182505326.png)
 
 ### 备份配置文件
 
 主要用于收集设备的配置文件，默认以txt格式文件存储.
 
-![image-20230311182548191](.\static\image\image-20230311182548191.png)
+![image-20230311182548191](https://github.com/liuyuanchengweb/simple_network_inspection_tool/blob/main/static/image/image-20230311182548191.png)
 
 ### 查询接口
 
@@ -106,7 +106,7 @@ def huawei_cpu(conn: BaseConnection):
 
 
 
-![image-20230311175830892](.\static\image\image-20230311175830892.png)
+![image-20230311175830892](https://github.com/liuyuanchengweb/simple_network_inspection_tool/blob/main/static/image/image-20230311175830892.png)
 
 
 
@@ -118,7 +118,7 @@ Python 3.10以上
 
 部署测试虚拟机为Windows10
 
-![image-20230311183240998](.\static\image\image-20230311183240998.png)
+![image-20230311183240998](https://github.com/liuyuanchengweb/simple_network_inspection_tool/blob/main/static/image/image-20230311183240998.png)
 
 ### 部署命令
 
@@ -148,9 +148,9 @@ C:\Users\ycll\Desktop\simple_network_inspection_tool_v0.2.0>poetry install
 poetry run run.py
 ~~~
 
-![image-20230311184148620](.\static\image\image-20230311184148620.png)
+![image-20230311184148620](https://github.com/liuyuanchengweb/simple_network_inspection_tool/blob/main/static/image/image-20230311184148620.png)
 
-![image-20230311184946946](.\static\image\image-20230311184946946.png)
+![image-20230311184946946](https://github.com/liuyuanchengweb/simple_network_inspection_tool/blob/main/static/image/image-20230311184946946.png)
 
 默认监控18888端口
 
@@ -160,13 +160,14 @@ poetry run run.py
 
 可以通过本地访问，也可以通过远端访问
 
-![image-20230311185329838](.\static\image\image-20230311185329838.png)
+![image-20230311185329838](https://github.com/liuyuanchengweb/simple_network_inspection_tool/blob/main/static/image/image-20230311185329838.png)
 
-![image-20230311185357072](.\static\image\image-20230311185357072.png)
+![image-20230311185357072](https://github.com/liuyuanchengweb/simple_network_inspection_tool/blob/main/static/image/image-20230311185357072.png)
 
 ## 感谢
 
 NetDevOps同路人：王印老师，九净老师，点滴技术，朱嘉盛老师
 
 以及Netmiko开源项目，FastAPI,以及相关的开源项目
-
+## 开源许可
+开源许可遵循MIT开源协议
