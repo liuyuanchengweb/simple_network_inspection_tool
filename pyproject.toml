@@ -1,0 +1,60 @@
+[tool.poetry]
+name = "simple-network-inspection-tool"
+version = "0.1.0"
+description = ""
+authors = ["yucheng <1046404397@qq.com>"]
+readme = "README.md"
+packages = [{include = "simple_network_inspection_too"}]
+
+
+[tool.poetry.dependencies]
+python = "^3.10"
+anyio="3.6.2"
+bcrypt="4.0.1"
+cffi="1.15.1"
+click="8.1.3"
+colorama="0.4.6"
+cryptography="39.0.1"
+et-xmlfile="1.1.0"
+fastapi="0.92.0"
+future="0.18.3"
+greenlet="2.0.2"
+h11="0.14.0"
+httptools="0.5.0"
+idna="3.4"
+netmiko="4.1.2"
+ntc-templates="3.2.0"
+openpyxl="3.1.1"
+pandas="1.5.3"
+paramiko="3.0.0"
+pycparser="2.21"
+pydantic="1.10.5"
+PyNaCl="1.5.0"
+pyserial="3.5"
+python-dateutil="2.8.2"
+python-dotenv="1.0.0"
+python-multipart="0.0.5"
+pytz="2022.7.1"
+PyYAML="6.0"
+scp="0.14.5"
+six="1.16.0"
+sniffio="1.3.0"
+SQLAlchemy="2.0.4"
+starlette="0.25.0"
+tenacity="8.2.1"
+textfsm="1.1.2"
+typing_extensions="4.5.0"
+uvicorn="0.20.0"
+watchfiles="0.18.1"
+websockets="10.4"
+XlsxWriter="3.0.8"
+loguru="0.6.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "tsinghua"
+url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple/"
+default = true
