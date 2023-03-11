@@ -165,7 +165,7 @@ poetry run run.py
 ![image-20230311185357072](https://github.com/liuyuanchengweb/simple_network_inspection_tool/blob/main/static/image/image-20230311185357072.png)
 
 ## 感谢
-
+前端室友
 NetDevOps同路人：王印老师，九净老师，点滴技术，朱嘉盛老师
 
 以及Netmiko开源项目，FastAPI,以及相关的开源项目
