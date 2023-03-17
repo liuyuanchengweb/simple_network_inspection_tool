@@ -1,18 +1,23 @@
+import asyncio
+import os
 from sqlalchemy.orm import sessionmaker
 from typing import List
 from .database import engine, Base
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, WebSocket
 from .schemas import ResponseDeviceIn, DeviceIn
 from starlette.responses import FileResponse
-from .utility import ConnectDevice, BackupConfigConnectDevice, ConnectTest
+from .utility import Module, Start, log_date
 from .file_handle import file_handle
 from API import crud
+from .decorator import DataHandle
+from .config import config_init
 
 application = APIRouter()
-
+module = asyncio.run(Module().load_plugins())
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 db_conn = engine.connect()
+config_init()
 
 
 def get_db():
@@ -142,32 +147,54 @@ def get_hostname(hostname: str, db: Session = Depends(get_db)):
 
 @application.websocket("/ws/start")
 async def ws_start(websocket: WebSocket, db: Session = Depends(get_db)):
+    """
+    启动巡检接口
+    :param websocket: websocket类
+    :param db: db连接对象
+    :return:
+    """
     device_obj = crud.get_dev_all(db)
     await websocket.accept()
     await websocket.send_text('连接成功')
-    connect = ConnectDevice(device_obj, module_path='templates', websocket=websocket)
-    await connect.start()
+    start = Start()
+    await start.connect_on(device_obj, module, websocket)
+    file_path = file_handle.patrol_network_to_excel(DataHandle.data_dict)
+    log_info = f'{log_date()}巡检文件路径为{os.path.realpath(file_path)}'
+    await websocket.send_text(log_info)
+    DataHandle.data_dict.clear()
     await websocket.send_text('完成断开链接')
     await websocket.close()
 
 
 @application.websocket("/ws/BackupConfig")
 async def ws_backup_config(websocket: WebSocket, db: Session = Depends(get_db)):
+    """
+    备份配置文件接口
+    :param websocket:  websocket类
+    :param db: db连接对象
+    :return:
+    """
     device_obj = crud.get_dev_all(db)
     await websocket.accept()
     await websocket.send_text('连接成功')
-    connect = BackupConfigConnectDevice(device_obj, module_path='templates', websocket=websocket)
-    await connect.start()
+    start = Start()
+    await start.connect_backup(device_obj, module, websocket)
     await websocket.send_text('完成断开链接')
     await websocket.close()
 
 
 @application.websocket("/ws/ConnectTest")
 async def ws_connect_test(websocket: WebSocket, db: Session = Depends(get_db)):
+    """
+    测试设备连通性接口
+    :param websocket: websocket类
+    :param db: db连接对象
+    :return:
+    """
     device_obj = crud.get_dev_all(db)
     await websocket.accept()
     await websocket.send_text('连接成功')
-    connect = ConnectTest(device_obj, module_path='templates', websocket=websocket)
-    await connect.start()
+    start = Start()
+    await start.connect_test(device_obj, module, websocket)
     await websocket.send_text('完成断开链接')
     await websocket.close()

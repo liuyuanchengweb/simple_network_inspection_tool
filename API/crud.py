@@ -33,6 +33,7 @@ def update_device_info(db: Session, device_info: schemas.DeviceIn):
     dev.super_pw = device_info.super_pw
     dev.password = device_info.password
     dev.username = device_info.username
+    dev.templates_name = device_info.templates_name
     db.commit()
     db.refresh(dev)
     return dev

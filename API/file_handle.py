@@ -65,7 +65,6 @@ class FileHandle:
     async def excel_to_database(self, file_object, file_name, file_path: str | None = None):
         save_path = await self.exists_file_path(file_object, file_name, file_path)
         drf = pd.read_excel(save_path)
-        print(f'drf输出----->{drf}')
         drf.to_sql(name='device_info', con=self.engine_obj, index=False, if_exists='append')
 
     def patrol_network_to_excel(self, data):

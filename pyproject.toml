@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "simple-network-inspection-tool"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["yucheng <1046404397@qq.com>"]
 readme = "README.md"
