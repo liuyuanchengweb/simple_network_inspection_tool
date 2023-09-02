@@ -1,31 +1,40 @@
 import asyncio
-import os
-from sqlalchemy.orm import sessionmaker
 from typing import List
-from .database import engine, Base
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, WebSocket
-from .schemas import ResponseDeviceIn, DeviceIn
+from websockets.exceptions import ConnectionClosedError
 from starlette.responses import FileResponse
-from .utility import Module, Start, log_date
-from .file_handle import file_handle
 from API import crud
-from .decorator import DataHandle
-from .config import config_init
+from API.file_operations import get_db, Session, FileHandler, FilePathInfo, FileService, ResponseDeviceIn, DeviceIn, \
+    InspectionOption, TestDeviceOption
+from API.config import ConfigManager
+from API.logger import log_queue, logger
+from API.device_management import run_task, connect_test
 
 application = APIRouter()
-module = asyncio.run(Module().load_plugins())
-Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
-db_conn = engine.connect()
-config_init()
+app_websocket = APIRouter()
+config = ConfigManager()
+file_handler = FileHandler()
+file_path_info = FilePathInfo(config=config)
+file_service = FileService(file_handler, file_path_info)
 
 
-def get_db():
-    db = Session()
+@app_websocket.websocket('/ws')
+async def handle_websocket(websocket: WebSocket):
     try:
-        yield db
+        await websocket.accept()
+        while True:
+            while not log_queue.empty():
+                queue_data = log_queue.get()
+                await websocket.send_json({'msg': f'"日志数据: {queue_data}"'})
+            await websocket.send_json({'msg': 'ok'})
+            await asyncio.sleep(0.50)
+    except ConnectionClosedError:
+        logger.debug("WebSocket connection closed.")
+    except Exception as e:
+        logger.error(f'websocket服务异常关闭{e}')
     finally:
-        db.close()
+        await websocket.close()
+        print(f'--------------关闭连接')
 
 
 @application.post("/add_device", response_model=ResponseDeviceIn, summary='添加设备')
@@ -46,9 +55,12 @@ def download_dev_profile():
     下载设备模板接口
     :return:
     """
-    file_handle.database_to_file()
-    return FileResponse(file_handle.download_path,
-                        headers={"content-disposition": 'attachment; filename="uploadnes_template_zh_CN.xlsx"'})
+    file = file_service.get_upload_template_zh_CN_file()
+    try:
+        return FileResponse(file[0],
+                            headers={"content-disposition": 'attachment; filename="uploadnes_template_zh_CN.xlsx"'})
+    except Exception as e:
+        return {'error': e}
 
 
 @application.post("/upload_dev_profile", summary="上传接口")
@@ -58,9 +70,8 @@ async def upload_dev_profile(file: UploadFile = File(...)):
     :param file: excel文件类型
     :return:
     """
-    file_name = file.filename
     file_data = await file.read()
-    await file_handle.excel_to_database(file_data, file_name)
+    file_service.write_upload_template_zh_CN_file(file_data, crud.get_hostname, crud.create_device)
     return {'msg': 'ok'}
 
 
@@ -145,56 +156,32 @@ def get_hostname(hostname: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail='未找到设备')
 
 
-@application.websocket("/ws/start")
-async def ws_start(websocket: WebSocket, db: Session = Depends(get_db)):
-    """
-    启动巡检接口
-    :param websocket: websocket类
-    :param db: db连接对象
-    :return:
-    """
-    device_obj = crud.get_dev_all(db)
-    await websocket.accept()
-    await websocket.send_text('连接成功')
-    start = Start()
-    await start.connect_on(device_obj, module, websocket)
-    file_path = file_handle.patrol_network_to_excel(DataHandle.data_dict)
-    log_info = f'{log_date()}巡检文件路径为{os.path.realpath(file_path)}'
-    await websocket.send_text(log_info)
-    DataHandle.data_dict.clear()
-    await websocket.send_text('完成断开链接')
-    await websocket.close()
+@application.post("/DeviceStart")
+async def device_start(action: InspectionOption):
+    execute_all = action.execute_all
+    target_func_name = action.target_func_name
+    content_process = action.content_process.name
+    run_task(get_dev_all_func=crud.get_dev_all,
+             config_manager=config,
+             file_service=file_service,
+             content_process=content_process,
+             execute_all=execute_all,
+             target_func_name=target_func_name,
+             delay_time=config.get_config.device_task_delay,
+             max_thread_count=config.get_config.device_task_threads
+             )
+    return {'msg': 'ok'}
 
 
-@application.websocket("/ws/BackupConfig")
-async def ws_backup_config(websocket: WebSocket, db: Session = Depends(get_db)):
-    """
-    备份配置文件接口
-    :param websocket:  websocket类
-    :param db: db连接对象
-    :return:
-    """
-    device_obj = crud.get_dev_all(db)
-    await websocket.accept()
-    await websocket.send_text('连接成功')
-    start = Start()
-    await start.connect_backup(device_obj, module, websocket)
-    await websocket.send_text('完成断开链接')
-    await websocket.close()
-
-
-@application.websocket("/ws/ConnectTest")
-async def ws_connect_test(websocket: WebSocket, db: Session = Depends(get_db)):
-    """
-    测试设备连通性接口
-    :param websocket: websocket类
-    :param db: db连接对象
-    :return:
-    """
-    device_obj = crud.get_dev_all(db)
-    await websocket.accept()
-    await websocket.send_text('连接成功')
-    start = Start()
-    await start.connect_test(device_obj, module, websocket)
-    await websocket.send_text('完成断开链接')
-    await websocket.close()
+@application.post("/TestDevice")
+async def test_device(action: TestDeviceOption, db: Session = Depends(get_db)):
+    if action.pattern:
+        for device in crud.get_dev_all(db=db):
+            host = device.hostname
+            port = device.port
+            connect_test(host=host, port=port)
+    else:
+        host = action.hostname
+        port = action.port
+        connect_test(host=host, port=port)
+    return {'msg': 'ok'}

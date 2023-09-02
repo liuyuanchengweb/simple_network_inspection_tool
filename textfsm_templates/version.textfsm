@@ -1,0 +1,5 @@
+Value version (\S+)
+Value OS ([a-z,A-Z,0-9]+)
+
+Start
+  ^VRP.*Version\s+${version}\s+\(\S+\s+${OS} -> Record

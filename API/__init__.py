@@ -1,1 +1,1 @@
-from API.main import application
+from API.main import application, app_websocket

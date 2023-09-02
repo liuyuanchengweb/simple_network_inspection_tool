@@ -1,0 +1,16 @@
+Value Destination (\S+)
+Value Proto ([a-z,A-Z]+)
+Value Pre (\d+)
+Value Cost (\d+)
+Value Flags ([A-Z,a-z]+)
+Value List NextHop (\S+)
+Value Interface (\S+)
+
+Start
+  ^.*-------------- -> Routes
+
+Routes
+  # 下一行的开始的标识符
+  ^\s+\d+ -> Continue.Record
+  ^\s+${Destination}\s+${Proto}\s+${Pre}\s+${Cost}\s+${Flags}\s+${NextHop}\s+${Interface}
+  ^\s+[A-Z,a-z]+\s+\d+\s+\d+\s+[A-Z,a-z]+\s+${NextHop}

@@ -1,17 +1,20 @@
+import threading
 import uvicorn
+import os
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
-from API import application
-import os
+from API import application, app_websocket
 
 app = FastAPI()
+web_app = FastAPI()
 if not os.path.exists('./static'):
     os.mkdir('./static')
 
 app.mount('/static', StaticFiles(directory='./static'), name="static")
 app.include_router(application, prefix="/API", tags=["API"])
+web_app.include_router(app_websocket, prefix="/API", tags=["API"])
 
 
 @app.get("/")
@@ -28,5 +31,11 @@ async def index() -> HTMLResponse:
     return HTMLResponse(content=html_content, status_code=200)
 
 
+def start_websocket_server():
+    uvicorn.run("run:web_app", host="0.0.0.0", port=18887)
+
+
 if __name__ == '__main__':
-    uvicorn.run("run:app", host='0.0.0.0', port=18888, reload=True, workers=3)
+    websocket_thread = threading.Thread(target=start_websocket_server, daemon=True)
+    websocket_thread.start()
+    uvicorn.run("run:app", host='0.0.0.0', port=18888)

@@ -1,0 +1,14 @@
+Value Interface ([GigabitEthernet|MEth]\S+)
+Value PHY (\S+)
+Value Protocol (\S+)
+Value InUti (\S+)
+Value OutUti (\S+)
+Value inErrors (\S+)
+Value outErrors (\S+)
+
+Start
+  ^.*outErrors -> Interface
+  # ^${Interface}\s+${PHY}\s+${Protocol}\s+${InUti}\s+${OutUti}\s+${inErrors}\s+${outErrors} -> Record
+
+Interface
+  ^${Interface}\s+${PHY}\s+${Protocol}\s+${InUti}\s+${OutUti}\s+${inErrors}\s+${outErrors} -> Record

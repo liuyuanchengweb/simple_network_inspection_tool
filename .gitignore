@@ -1,0 +1,15 @@
+*.log
+*.xlsx
+*.pyc
+logs/
+datasets/
+Customer_Data_Export/
+database_to_file_path/
+databast_to_file/
+database.sqlite3*
+test*
+*.json
+*.yaml
+*.cmd
+*.ps1*
+.idea/

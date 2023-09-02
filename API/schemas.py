@@ -1,6 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
 from typing import Optional
+from datetime import datetime
+import os
 
 CLASS_MAPPER_BASE = {
     "a10": 'A10',
@@ -265,3 +267,100 @@ class DeviceIn(ResponseDeviceIn):
     super_pw: Optional[str] = None
 
 
+class InterInfo(BaseModel):
+    pass
+
+
+class InterfaceInfo(BaseModel):
+    """
+    模型类，实现通过pydantic校验，也是一个结构体
+    """
+    id: Optional[int]
+    collect_time: datetime = datetime.now()
+    ip_add: str
+    inter_info: str
+
+
+class DirPath(BaseModel):
+    base_dir: str = os.path.abspath(os.curdir)
+    templates_dir: str = 'templates'
+    textfsm_templates_dir: str = 'textfsm_templates'
+    logs_dir: str = 'Logs'
+    datasets_dir: str = 'Datasets'
+    customer_data_export_dir: str = 'Customer_Data_Export'
+    backup_device_config_file_dir: str = 'backup_config'
+
+
+class FileName(BaseModel):
+    upload_template_name: str = 'upload_template_zh_CN.xls'
+    network_device_inspection_file_name: str = 'Network_Device_Inspection.xlsx'
+
+
+class NetmikoDeviceType(BaseModel):
+    protocol: str = ''
+    device_type: str = ''
+
+
+class NetmikoKernelParameter(BaseModel):
+    ip: str = ""
+    host: str = ""
+    username: str = ""
+    password: Optional[str] = None
+    secret: str = Field(default=None)
+    port: Optional[int] = None
+
+    @classmethod
+    @validator('secret', pre=True, always=True)
+    def convert_none_to_empty_string(cls, value):
+        if value is None:
+            return ''
+        return value
+
+
+class NetmikoOptionalParam(BaseModel):
+    conn_timeout: int = 30
+    timeout: int = 120
+    global_delay_factor: int = 1
+    fast_cli: bool = True
+    session_log: str = os.path.join(os.path.abspath(os.curdir), 'Logs', 'netmiko_session_log.txt')
+    session_log_record_writes: bool = True
+    session_log_file_mode: str = 'append'
+    allow_auto_change: bool = False
+    encoding: str = "utf-8"
+
+
+class NetmikoInspectionTemplates(BaseModel):
+    templates_name: str
+
+
+class Configuration(BaseModel):
+    database_url: str = 'sqlite:///database.sqlite3'
+    device_task_delay: int = 1
+    device_task_threads: int = 4
+    dir_path: DirPath = DirPath()
+    file_name: FileName = FileName()
+    netmiko_param: NetmikoOptionalParam = NetmikoOptionalParam()
+
+
+class ContentProcessEnum(str, Enum):
+    backup_txt: str = '备份配置文件'
+    txt: str = '保存内容txt'
+    excel: str = '保存内容单表excel'
+    excel_sheet: str = '保存多表excel'
+    custom: str = '自定义保存格式'
+
+
+class InspectionOption(BaseModel):
+    execute_all: bool
+    target_func_name: Optional[str]
+    content_process: ContentProcessEnum = Field(ContentProcessEnum.backup_txt, description="Choose a content process")
+
+
+def create_status_enum_class(enum_name, enum_fields: dict):
+    return Enum(enum_name, enum_fields)
+
+
+class TestDeviceOption(BaseModel):
+    pattern: bool
+    hostname: Optional[str]
+    port: Optional[int]
