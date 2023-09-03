@@ -333,8 +333,17 @@ class NetmikoInspectionTemplates(BaseModel):
     templates_name: str
 
 
+class DatabaseConfig(BaseModel):
+    drivername: str = 'sqlite'
+    username: Optional[str]
+    password: Optional[str]
+    host: Optional[str]
+    port: Optional[int]
+    database: Optional[str] = '/database.sqlite3'
+
+
 class Configuration(BaseModel):
-    database_url: str = 'sqlite:///database.sqlite3'
+    database_url: DatabaseConfig = DatabaseConfig()
     device_task_delay: int = 1
     device_task_threads: int = 4
     dir_path: DirPath = DirPath()

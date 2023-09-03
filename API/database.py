@@ -1,12 +1,39 @@
 import functools
 import inspect
 from typing import Callable, Generator
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, URL
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from sqlalchemy.engine.base import Connection
+from API.config import ConfigManager
 
-SQLALCHEMY_DATABASE_URL = 'sqlite:///database.sqlite3'
+config_manager = ConfigManager()
+
+
+def database_url(url_param: ConfigManager):
+    drivername = url_param.get_config.database_url.drivername
+    database = url_param.get_config.database_url.database
+    username = url_param.get_config.database_url.username
+    password = url_param.get_config.database_url.password
+    host = url_param.get_config.database_url.host
+    port = url_param.get_config.database_url.port
+    if drivername == 'sqlite':
+        if database:
+            return URL.create(
+                drivername=drivername,
+                database=database,
+            )
+    return URL.create(
+        drivername=drivername,
+        username=username,
+        password=password,
+        host=host,
+        port=port,
+        database=database,
+    )
+
+
+SQLALCHEMY_DATABASE_URL = database_url(config_manager)
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
 Session = sessionmaker(bind=engine)

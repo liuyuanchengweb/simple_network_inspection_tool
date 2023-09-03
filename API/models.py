@@ -6,14 +6,14 @@ from API.schemas import DeviceType, Protocol, create_status_enum_class
 class DeviceInfo(Base):
     __tablename__ = 'device_info'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    hostname = Column(String)
+    hostname = Column(String(255))
     device_type = Column(Enum(DeviceType))
-    username = Column(String)
-    password = Column(String)
-    super_pw = Column(String, nullable=True)
+    username = Column(String(255))
+    password = Column(String(255))
+    super_pw = Column(String(255), nullable=True)
     protocol = Column(Enum(Protocol))
     port = Column(Integer, default=22)
-    templates_name = Column(String, nullable=True)
+    templates_name = Column(String(255), nullable=True)
     __table_args__ = (UniqueConstraint('hostname'),)
 
     def to_dict(self):
@@ -31,7 +31,7 @@ class InterfaceInfo(Base):
     __tablename__ = 'interface_info'
     id = Column(Integer, primary_key=True, autoincrement=True)
     collect_time = Column(DateTime)
-    ip_add = Column(String)
+    ip_add = Column(String(255))
     inter_info = Column(Text, nullable=True)
 
 
@@ -53,7 +53,7 @@ def create_table_model(table_name, fields, enum=False, enum_fields=None):
         if field_type == "integer":
             setattr(DynamicTable, field_name, Column(Integer))
         elif field_type == "string":
-            setattr(DynamicTable, field_name, Column(String))
+            setattr(DynamicTable, field_name, Column(String(255)))
         elif field_type == 'DateTime':
             setattr(DynamicTable, field_name, Column(DateTime))
         elif field_type == 'Text':
