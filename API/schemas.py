@@ -339,7 +339,7 @@ class DatabaseConfig(BaseModel):
     password: Optional[str]
     host: Optional[str]
     port: Optional[int]
-    database: Optional[str] = '/database.sqlite3'
+    database: Optional[str] = os.path.join(os.path.abspath(os.curdir), 'database.sqlite3')
 
 
 class Configuration(BaseModel):
